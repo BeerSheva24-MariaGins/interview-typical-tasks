@@ -11,19 +11,19 @@ public class InterviewTasks {
      * @return true if a given array comprises of two number,
      *         summing of which gives the value equaled to a given "sum" value
      */
+   
     static public boolean hasSumTwo(int[] array, int sum) {
-        Set<Integer> map = new HashSet<>();
-        int i = 0;
-        boolean res = false;
+    Set<Integer> seenNumbers = new HashSet<>();
+    boolean flag = false;
 
-        while (!res && i < array.length) {
-            int pair = sum - array[i];
+    for (int num : array) {
+        int target = sum - num;           
 
-            if (map.contains(pair)) {
-                res = true;
-            }
-            map.add(array[i++]);
-        }
-        return res;
-    }
+        if (seenNumbers.contains(target)) {
+            flag = true;
+        }        
+        seenNumbers.add(num);
+    }    
+    return flag;
+}
 }
