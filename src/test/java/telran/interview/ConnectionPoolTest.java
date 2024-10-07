@@ -1,55 +1,50 @@
 package telran.interview;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.NoSuchElementException;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-class ConnectionPoolTest {
-    private ConnectionPool connectionPool;
-    private Connection connection;
+public class ConnectionPoolTest {
+    private static final int N_CONNECTIONS = 3;
+    ConnectionPool connectionPool;
+    Connection[] connections = {
+            new Connection("Connection1"),
+            new Connection("Connection2"),
+            new Connection("Connection3"),
+            new Connection("Connection4"),
+    };
 
     @BeforeEach
     void setUp() {
-        connectionPool = new ConnectionPool(3);
-        connection = new Connection("1");
-        connectionPool.addConnection(connection);
-        assertThrows(IllegalStateException.class, () -> connectionPool.addConnection(connection));
+        connectionPool = new ConnectionPool(N_CONNECTIONS);
+        for (int i = 1; i <= N_CONNECTIONS; i++) {
+            connectionPool.addConnection(connections[i - 1]);
+        }
     }
 
     @Test
-    void addConnectionTest() {
-        ConnectionPool connectionPool = new ConnectionPool(3);
-        Connection connection1 = new Connection("conn1");
-        Connection connection2 = new Connection("conn2");
+    void addAndDeletionTest() {
+        connectionPool.addConnection(connections[connections.length - 1]);
 
-        connectionPool.addConnection(connection1);
-        connectionPool.addConnection(connection2);
-
-        assertEquals(connection1, connectionPool.getConnection("conn1"));
-        assertEquals(connection2, connectionPool.getConnection("conn2"));
+        assertThrowsExactly(IllegalStateException.class,
+                () -> connectionPool.addConnection(connections[1]));
+        assertThrowsExactly(IllegalStateException.class,
+                () -> connectionPool.addConnection(connections[2]));
+        assertThrowsExactly(IllegalStateException.class,
+                () -> connectionPool.addConnection(connections[3]));
+        connectionPool.addConnection(connections[0]);
     }
 
     @Test
-    void getNonExistentConnectionTest() {
-        assertThrows(NoSuchElementException.class, () -> connectionPool.getConnection("nonexistent"));
-    }
-
-    @Test
-    void maxSizeTest() {
-        ConnectionPool connectionPool = new ConnectionPool(2);
-        Connection connection1 = new Connection("conn1");
-        Connection connection2 = new Connection("conn2");
-        Connection connection3 = new Connection("conn3");
-
-        connectionPool.addConnection(connection1);
-        connectionPool.addConnection(connection2);
-        connectionPool.addConnection(connection3);
-
-        assertThrows(NoSuchElementException.class, () -> connectionPool.getConnection("1"));
-        assertEquals(connection2, connectionPool.getConnection("conn2"));
-        assertEquals(connection3, connectionPool.getConnection("conn3"));
+    void aceesOrderTest() {
+        assertEquals(connections[0], connectionPool.getConnection("Connection1"));
+        connectionPool.addConnection(connections[connections.length - 1]);
+        connectionPool.getConnection("Connection1");
+        connectionPool.getConnection("Connection3");
+        connectionPool.getConnection("Connection4");
+        assertThrowsExactly(NoSuchElementException.class,
+                () -> connectionPool.getConnection("Connection2"));
     }
 }
